@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análisis Estadístico</title>
+  <link rel="stylesheet" href="Analisis.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <h2><a href="inicio.html"></a>🍍 Piña Digital</h2>
+    <ul>
+      <li class="active">📊Análisis Estadístico</li>
+      <li>Inventario</li>
+      <li>Notas de Venta</li>
+    </ul>
+    <ul>
+      <li><a href="tienda.html">🏠 Tienda Virtual</a></li>
+    </ul>
+  </div>
+
+  <!-- Contenido -->
+  <div class="content">
+    <!-- Header -->
+    <div class="header">
+      <img src="Piña Digita.png" alt="La Piña Logo">
+
+      <div class="search-box">
+        <input type="text" placeholder="Buscar...">
+      </div>
+
+      <!-- Menú de usuario -->
+      <div class="user-menu">
+        <button id="userBtn" class="user-btn">
+          <img src="userIcon.png" alt="Usuario" class="user-img">
+          <span class="user-name">Administrador</span>
+          <span class="arrow">▼</span>
+        </button>
+        <div id="dropdownMenu" class="dropdown-content">
+          <a href="#">👤 Perfil</a>
+          <a href="#">⚙️ Configuración</a>
+          <a href="login.html">🚪 Cerrar sesión</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección de análisis -->
+    <h2>📊 Análisis Estadístico</h2>
+
+    <div class="stats-section">
+      <div class="stat-card">
+        <h3>Clientes más frecuentes</h3>
+        <canvas id="clientesChart"></canvas>
+      </div>
+
+      <div class="stat-card">
+        <h3>Productos más vendidos</h3>
+        <canvas id="productosChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Menú desplegable usuario ---
+    const userBtn = document.getElementById("userBtn");
+    const dropdownMenu = document.getElementById("dropdownMenu");
+    const arrow = document.querySelector(".arrow");
+
+    userBtn.onclick = (e) => {
+      e.stopPropagation();
+      dropdownMenu.classList.toggle("show");
+      arrow.classList.toggle("rotate");
+    };
+
+    window.onclick = (e) => {
+      if (!e.target.closest(".user-menu")) {
+        dropdownMenu.classList.remove("show");
+        arrow.classList.remove("rotate");
+      }
+    };
+
+    // --- Gráfico de clientes ---
+    const ctxClientes = document.getElementById('clientesChart');
+    new Chart(ctxClientes, {
+      type: 'bar',
+      data: {
+        labels: ['Francisco', 'María', 'Carlos', 'Sofía', 'Luis'],
+        datasets: [{
+          label: 'Compras realizadas',
+          data: [12, 9, 7, 5, 4],
+          backgroundColor: '#16a085'
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+
+    // --- Gráfico de productos ---
+    const ctxProductos = document.getElementById('productosChart');
+    new Chart(ctxProductos, {
+      type: 'doughnut',
+      data: {
+        labels: ['Computadores', 'Celulares', 'Periféricos', 'Licencias', 'Repuestos'],
+        datasets: [{
+          data: [40, 25, 15, 10, 10],
+          backgroundColor: ['#16a085', '#1abc9c', '#48c9b0', '#73d7c8', '#a2e4d7']
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { position: 'bottom' }
+        }
+      }
+    });
+  </script>
+
+</body>
+</html>

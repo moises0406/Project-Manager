@@ -1,0 +1,177 @@
+/* Fuente */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+/* Fondo superior con logo */
+.header {
+  background: #000;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.header img{
+width: 200px;
+height: auto;
+}
+
+.logo {
+  width: 120px;
+  max-width: 40%;
+}
+
+/* Caja blanca responsiva */
+.wrapper {
+  background: #fff;
+  border-radius: 40px 40px 0 0;
+  padding: 40px 30px;
+  margin-top: -30px;
+  min-height: 60vh;
+  max-width: 450px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Títulos */
+.wrapper h1 {
+  font-size: 28px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 5px;
+  color: #000;
+}
+
+.subtitle {
+  text-align: center;
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 20px;
+}
+
+/* Labels */
+label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #777;
+  margin: 10px 0 5px;
+}
+
+/* Inputs */
+.input-box {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.input-box input {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: none;
+  background: #e6e6e6;
+  font-size: 14px;
+  outline: none;
+}
+
+/* Mostrar contraseña */
+.show-pass {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 15px;
+}
+
+/* Botón */
+.btn {
+  width: 100%;
+  padding: 14px;
+  background: #000;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: 0.3s;
+}
+
+.btn:hover {
+  background: #333;
+}
+
+/* Enlaces */
+.register-link {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+}
+
+.register-link a {
+  color: #00bcd4;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+/* ====== RESPONSIVE ====== */
+@media (max-width: 768px) {
+  .wrapper {
+    padding: 30px 20px;
+    border-radius: 30px 30px 0 0;
+  }
+
+  .wrapper h1 {
+    font-size: 24px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  .btn {
+    font-size: 15px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    width: 90px;
+  }
+
+  .wrapper {
+    padding: 25px 15px;
+    border-radius: 25px 25px 0 0;
+  }
+
+  .wrapper h1 {
+    font-size: 22px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .btn {
+    font-size: 14px;
+    padding: 10px;
+  }
+}
+form{
+  display:none;
+}
+
+form.active{
+  display:block;
+}
