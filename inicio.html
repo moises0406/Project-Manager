@@ -5,21 +5,23 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Servicios de Soporte Técnico</title>
   <link rel="stylesheet" href="style_inicio.css">
+  <!-- SDK de Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
   <!-- Sidebar -->
-<div class="sidebar">
-  <h2>🍍 Piña Digital</h2>
-  <ul>
-    <li><a href="Analisis.html">📊 Análisis Estadístico</a></li>
-    <li><a href="inventario.html">📦 Inventario</a></li>
-    <li><a href="notasv.html">🧾 Notas de Venta</a></li>
-  </ul>
-  <ul>
-    <li><a href="tienda.html">🏠 Tienda Virtual</a></li>
-  </ul>
-</div>
+  <div class="sidebar">
+    <h2>🍍 Piña Digital</h2>
+    <ul>
+      <li><a href="Analisis.html">📊 Análisis Estadístico</a></li>
+      <li><a href="inventario.html">📦 Inventario</a></li>
+      <li><a href="notasv.html">🧾 Notas de Venta</a></li>
+    </ul>
+    <ul>
+      <li><a href="tienda.html">🏠 Tienda Virtual</a></li>
+    </ul>
+  </div>
 
   <!-- Contenido -->
   <div class="content">
@@ -28,14 +30,14 @@
       <img src="Piña Digita.png" alt="La Piña Logo">
 
       <div class="search-box">
-        <input type="text" placeholder="Buscar...">
+        <input type="text" id="searchInput" placeholder="Buscar...">
       </div>
 
       <!-- Menú de usuario -->
       <div class="user-menu">
         <button id="userBtn" class="user-btn">
           <img src="userIcon.png" alt="Usuario" class="user-img">
-          <span class="user-name"></span>
+          <span class="user-name" id="userName"></span>
           <span class="arrow">▼</span>
         </button>
         <div id="dropdownMenu" class="dropdown-content">
@@ -58,30 +60,12 @@
           <th>N° Serie</th>
           <th>Costo</th>
           <th>Saldo</th>
+          <th>Estado</th>
           <th>Ver</th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td>Espinoza Francisco Roys</td>
-          <td>9786538</td>
-          <td>2</td>
-          <td>2025-08-09</td>
-          <td>SA089783</td>
-          <td>$120.000</td>
-          <td>$50.000</td>
-          <td><button class="btn" onclick="window.location.href='factura.html'">PDF</button></td>
-        </tr>
-        <tr>
-          <td>Zafra María Pacracia</td>
-          <td>97876643</td>
-          <td>5</td>
-          <td>2025-08-09</td>
-          <td>SA08783</td>
-          <td>$100.000</td>
-          <td>$80.000</td>
-          <td><button class="btn" onclick="window.location.href='factura.html'">PDF</button></td>
-        </tr>
+      <tbody id="serviciosTableBody">
+        <!-- Los datos se cargarán dinámicamente -->
       </tbody>
     </table>
   </div>
@@ -92,25 +76,42 @@
   <!-- Modal -->
   <div id="modalForm" class="modal">
     <div class="modal-content">
-      <h2>Nuevo Servidor Técnico</h2>
-      <form>
+      <h2>Nuevo Servicio Técnico</h2>
+      <form id="formServicio">
         <label>Cliente</label>
-        <input type="text" placeholder="Ingrese el Nombre del Nuevo Cliente">
+        <select id="id_cliente" required>
+          <option value="">Seleccionar cliente...</option>
+        </select>
+        
+        <label>Número de Servicio</label>
+        <input type="number" id="numero" placeholder="Número de servicio" required>
+
+        <label>Fecha de Emisión</label>
+        <input type="date" id="fecha_emision" required>
+
+        <label>Número de Serie</label>
+        <input type="text" id="numero_serie" placeholder="Número de serie">
 
         <label>Descripción</label>
-        <input type="text" placeholder="Ingrese la Descripción">
+        <textarea id="descripcion" placeholder="Descripción del problema"></textarea>
 
         <label>Estado</label>
-        <input type="text" placeholder="Ingrese el Estado">
-
-        <label>Celular</label>
-        <input type="text" placeholder="Ingrese el Celular">
-
-        <label>Costo</label>
-        <input type="text" placeholder="Ingrese el Costo">
+        <select id="estado">
+          <option value="recibido">Recibido</option>
+          <option value="en diagnostico">En Diagnóstico</option>
+          <option value="en reparacion">En Reparación</option>
+          <option value="completado">Completado</option>
+          <option value="entregado">Entregado</option>
+        </select>
 
         <label>Marca</label>
-        <input type="text" placeholder="Ingrese la Marca">
+        <input type="text" id="marca" placeholder="Marca del equipo">
+
+        <label>Costo</label>
+        <input type="number" id="costo" step="0.01" placeholder="0.00" required>
+
+        <label>Saldo</label>
+        <input type="number" id="saldo" step="0.01" placeholder="0.00" required>
 
         <div class="form-actions">
           <button type="button" id="closeModal" class="btn-cancelar">Cancelar</button>
@@ -121,14 +122,302 @@
   </div>
 
   <script>
-    // Modal
+    // Configuración de Supabase
+    const supabaseUrl = 'https://fjppdwbkbpmcbzbyjhzt.supabase.co';
+    const supabaseKey = 'sb_publishable_ZJ6fQfMjogGJX2V_ORYvDw_SGF3SFOY';
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+    // Estado global
+    let servicios = [];
+    let clientes = [];
+
+    // Cargar datos cuando la página se carga
+    document.addEventListener('DOMContentLoaded', async () => {
+      await cargarClientes();
+      await cargarServicios();
+      await cargarUsuarioActual();
+    });
+
+    // Cargar clientes para el select
+    async function cargarClientes() {
+      try {
+        const { data, error } = await supabase
+          .from('clientes')
+          .select('id_cliente, nombre, celular')
+          .order('nombre');
+
+        if (error) throw error;
+        
+        clientes = data || [];
+        const selectCliente = document.getElementById('id_cliente');
+        
+        selectCliente.innerHTML = '<option value="">Seleccionar cliente...</option>';
+        clientes.forEach(cliente => {
+          const option = document.createElement('option');
+          option.value = cliente.id_cliente;
+          option.textContent = `${cliente.nombre} - ${cliente.celular || 'Sin celular'}`;
+          selectCliente.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error cargando clientes:', error);
+      }
+    }
+
+    // Cargar servicios técnicos
+    async function cargarServicios() {
+      try {
+        const { data, error } = await supabase
+          .from('servicios_tecnicos')
+          .select(`
+            *,
+            clientes (
+              nombre,
+              celular
+            )
+          `)
+          .order('fecha_emision', { ascending: false });
+
+        if (error) throw error;
+        
+        servicios = data || [];
+        renderizarServicios();
+      } catch (error) {
+        console.error('Error cargando servicios:', error);
+        alert('Error al cargar los servicios');
+      }
+    }
+
+    // Renderizar servicios en la tabla
+    function renderizarServicios() {
+      const tbody = document.getElementById('serviciosTableBody');
+      tbody.innerHTML = '';
+
+      servicios.forEach(servicio => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${servicio.clientes?.nombre || 'Cliente no encontrado'}</td>
+          <td>${servicio.clientes?.celular || 'N/A'}</td>
+          <td>${servicio.numero || ''}</td>
+          <td>${servicio.fecha_emision || ''}</td>
+          <td>${servicio.numero_serie || 'N/A'}</td>
+          <td>$${servicio.costo?.toLocaleString() || '0'}</td>
+          <td>$${servicio.saldo?.toLocaleString() || '0'}</td>
+          <td><span class="estado-badge estado-${servicio.estado?.replace(' ', '')}">${servicio.estado || 'N/A'}</span></td>
+          <td>
+            <button class="btn" onclick="verPDF(${servicio.id_servicio})">PDF</button>
+            <button class="btn-editar" onclick="editarServicio(${servicio.id_servicio})">Editar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Agregar nuevo servicio
+    async function agregarServicio(servicioData) {
+      try {
+        const { data, error } = await supabase
+          .from('servicios_tecnicos')
+          .insert([servicioData])
+          .select();
+
+        if (error) throw error;
+        
+        await cargarServicios();
+        return data;
+      } catch (error) {
+        console.error('Error agregando servicio:', error);
+        throw error;
+      }
+    }
+
+    // Ver PDF (generar factura)
+    async function verPDF(id_servicio) {
+      try {
+        // Primero verificamos si ya existe una factura
+        const { data: facturaExistente, error: errorFactura } = await supabase
+          .from('facturas')
+          .select('*')
+          .eq('id_servicio', id_servicio)
+          .single();
+
+        if (errorFactura && errorFactura.code !== 'PGRST116') {
+          throw errorFactura;
+        }
+
+        if (facturaExistente) {
+          // Si ya existe, abrir la factura
+          window.open(facturaExistente.url_pdf, '_blank');
+        } else {
+          // Si no existe, crear nueva factura
+          const { data: nuevaFactura, error: errorNueva } = await supabase
+            .from('facturas')
+            .insert([{
+              id_servicio: id_servicio,
+              url_pdf: `factura_${id_servicio}.pdf`
+            }])
+            .select();
+
+          if (errorNueva) throw errorNueva;
+          
+          // Redirigir a la página de factura
+          window.location.href = `factura.html?id=${id_servicio}`;
+        }
+      } catch (error) {
+        console.error('Error generando factura:', error);
+        alert('Error al generar la factura');
+      }
+    }
+
+    // Editar servicio
+    async function editarServicio(id_servicio) {
+      const servicio = servicios.find(s => s.id_servicio === id_servicio);
+      if (servicio) {
+        // Llenar el formulario con los datos del servicio
+        document.getElementById('id_cliente').value = servicio.id_cliente;
+        document.getElementById('numero').value = servicio.numero;
+        document.getElementById('fecha_emision').value = servicio.fecha_emision;
+        document.getElementById('numero_serie').value = servicio.numero_serie || '';
+        document.getElementById('descripcion').value = servicio.descripcion || '';
+        document.getElementById('estado').value = servicio.estado || 'recibido';
+        document.getElementById('marca').value = servicio.marca || '';
+        document.getElementById('costo').value = servicio.costo || 0;
+        document.getElementById('saldo').value = servicio.saldo || 0;
+        
+        // Mostrar modal
+        modal.style.display = "flex";
+        
+        // Cambiar el texto del modal y el botón
+        document.querySelector('.modal-content h2').textContent = 'Editar Servicio Técnico';
+        document.querySelector('.btn-guardar').textContent = 'Actualizar';
+        
+        // Guardar el ID del servicio que se está editando
+        document.getElementById('formServicio').dataset.editingId = id_servicio;
+      }
+    }
+
+    // Cargar usuario actual
+    async function cargarUsuarioActual() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          document.getElementById('userName').textContent = user.email;
+        }
+      } catch (error) {
+        console.error('Error cargando usuario:', error);
+      }
+    }
+
+    // Elementos del DOM
     const modal = document.getElementById("modalForm");
     const openModal = document.getElementById("openModal");
     const closeModal = document.getElementById("closeModal");
+    const formServicio = document.getElementById("formServicio");
+    const searchInput = document.getElementById("searchInput");
 
-    openModal.onclick = () => modal.style.display = "flex";
-    closeModal.onclick = () => modal.style.display = "none";
-    window.onclick = (e) => { if (e.target == modal) modal.style.display = "none"; }
+    // Modal functions
+    openModal.onclick = () => {
+      // Resetear formulario
+      formServicio.reset();
+      document.querySelector('.modal-content h2').textContent = 'Nuevo Servicio Técnico';
+      document.querySelector('.btn-guardar').textContent = 'Guardar';
+      delete formServicio.dataset.editingId;
+      
+      // Establecer fecha actual por defecto
+      document.getElementById('fecha_emision').value = new Date().toISOString().split('T')[0];
+      
+      modal.style.display = "flex";
+    };
+
+    closeModal.onclick = () => {
+      modal.style.display = "none";
+      formServicio.reset();
+    };
+
+    window.onclick = (e) => { 
+      if (e.target == modal) {
+        modal.style.display = "none";
+        formServicio.reset();
+      }
+    }
+
+    // Manejar envío del formulario
+    formServicio.onsubmit = async (e) => {
+      e.preventDefault();
+      
+      const servicioData = {
+        id_cliente: parseInt(document.getElementById('id_cliente').value),
+        numero: parseInt(document.getElementById('numero').value),
+        fecha_emision: document.getElementById('fecha_emision').value,
+        numero_serie: document.getElementById('numero_serie').value,
+        descripcion: document.getElementById('descripcion').value,
+        estado: document.getElementById('estado').value,
+        marca: document.getElementById('marca').value,
+        costo: parseFloat(document.getElementById('costo').value),
+        saldo: parseFloat(document.getElementById('saldo').value)
+      };
+
+      try {
+        const editingId = formServicio.dataset.editingId;
+        
+        if (editingId) {
+          // Actualizar servicio existente
+          const { error } = await supabase
+            .from('servicios_tecnicos')
+            .update(servicioData)
+            .eq('id_servicio', editingId);
+
+          if (error) throw error;
+          alert('Servicio actualizado correctamente');
+        } else {
+          // Crear nuevo servicio
+          await agregarServicio(servicioData);
+          alert('Servicio agregado correctamente');
+        }
+        
+        modal.style.display = "none";
+        formServicio.reset();
+        await cargarServicios();
+      } catch (error) {
+        alert('Error al guardar el servicio: ' + error.message);
+      }
+    };
+
+    // Búsqueda en tiempo real
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const filteredServicios = servicios.filter(servicio => 
+        servicio.clientes?.nombre?.toLowerCase().includes(searchTerm) ||
+        servicio.clientes?.celular?.includes(searchTerm) ||
+        servicio.numero_serie?.toLowerCase().includes(searchTerm) ||
+        servicio.estado?.toLowerCase().includes(searchTerm)
+      );
+      
+      renderizarServiciosFiltrados(filteredServicios);
+    });
+
+    function renderizarServiciosFiltrados(serviciosFiltrados) {
+      const tbody = document.getElementById('serviciosTableBody');
+      tbody.innerHTML = '';
+
+      serviciosFiltrados.forEach(servicio => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${servicio.clientes?.nombre || 'Cliente no encontrado'}</td>
+          <td>${servicio.clientes?.celular || 'N/A'}</td>
+          <td>${servicio.numero || ''}</td>
+          <td>${servicio.fecha_emision || ''}</td>
+          <td>${servicio.numero_serie || 'N/A'}</td>
+          <td>$${servicio.costo?.toLocaleString() || '0'}</td>
+          <td>$${servicio.saldo?.toLocaleString() || '0'}</td>
+          <td><span class="estado-badge estado-${servicio.estado?.replace(' ', '')}">${servicio.estado || 'N/A'}</span></td>
+          <td>
+            <button class="btn" onclick="verPDF(${servicio.id_servicio})">PDF</button>
+            <button class="btn-editar" onclick="editarServicio(${servicio.id_servicio})">Editar</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
 
     // Menú desplegable usuario
     const userBtn = document.getElementById("userBtn");
@@ -148,7 +437,6 @@
       }
     };
   </script>
-  
 
 </body>
 </html>
