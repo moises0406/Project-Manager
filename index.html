@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Piña Digital — Servicios Técnicos</title>
+  <link rel="stylesheet" href="style_inicio.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <h2>🍍 Piña Digital</h2>
+      <nav>
+        <a href="#">📊 Análisis Estadístico</a>
+        <a href="#">📦 Inventario</a>
+        <a href="#">🧾 Notas de Venta</a>
+        <a href="#">🏠 Tienda Virtual</a>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <header class="header">
+        <div class="brand">
+          <img src="Piña Digita.png" alt="Piña Digital" />
+          <h1>Servicios Técnicos</h1>
+        </div>
+
+        <div class="controls">
+          <input id="search" placeholder="Buscar cliente, número o serie..." />
+          <button id="openModal" class="btn primary">+ Nuevo</button>
+        </div>
+      </header>
+
+      <section class="table-wrapper">
+        <table id="tablaServicios">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Celular</th>
+              <th>Número</th>
+              <th>F. Emisión</th>
+              <th>N° Serie</th>
+              <th>Costo</th>
+              <th>Saldo</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <h2 id="modalTitle">Nuevo Servicio</h2>
+      <form id="formServicio">
+        <input type="hidden" name="id" />
+
+        <label>Cliente
+          <input name="cliente" required />
+        </label>
+
+        <label>Descripción
+          <input name="descripcion" />
+        </label>
+
+        <label>Estado
+          <input name="estado" />
+        </label>
+
+        <label>Celular
+          <input name="celular" />
+        </label>
+
+        <label>Número
+          <input name="numero" type="number" required />
+        </label>
+
+        <label>Fecha de emisión
+          <input name="fecha_emision" type="date" required />
+        </label>
+
+        <label>N° Serie
+          <input name="numero_serie" />
+        </label>
+
+        <label>Costo
+          <input name="costo" type="number" step="0.01" required />
+        </label>
+
+        <label>Saldo
+          <input name="saldo" type="number" step="0.01" />
+        </label>
+
+        <label>Marca
+          <input name="marca" />
+        </label>
+
+        <div class="form-actions">
+          <button type="button" id="cancelBtn" class="btn">Cancelar</button>
+          <button type="submit" class="btn primary">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
